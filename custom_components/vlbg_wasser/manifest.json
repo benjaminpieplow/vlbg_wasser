@@ -1,0 +1,10 @@
+{
+  "domain": "vlbg_wasser",
+  "name": "Vorarlberg Wasser Daten",
+  "codeowners": ["github:benjaminpieplow"],
+  "dependencies": [],
+  "documentation": "https://github.com/benjaminpieplow/vlbg_wasser",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "requirements": []
+}
