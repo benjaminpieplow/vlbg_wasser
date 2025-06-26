@@ -5,6 +5,7 @@
   "dependencies": [],
   "documentation": "https://github.com/benjaminpieplow/vlbg_wasser",
   "issue_tracker": "https://github.com/benjaminpieplow/vlbg_wasser/issues",
+  "version": "1.0.0",
   "integration_type": "service",
   "iot_class": "cloud_polling",
   "requirements": ["aiohttp>=3.8.0"]
