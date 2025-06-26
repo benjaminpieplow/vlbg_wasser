@@ -6,5 +6,5 @@
   "documentation": "https://github.com/benjaminpieplow/vlbg_wasser",
   "integration_type": "service",
   "iot_class": "cloud_polling",
-  "requirements": []
+  "requirements": ["aiohttp>=3.8.0"]
 }
