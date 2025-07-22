@@ -1,0 +1,26 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Vorarlberg Wasser",
+        "description": "This integration will connect to the Vorarlberg water monitoring system to retrieve water level, flow, and temperature data from river monitoring stations.",
+        "data": {}
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to the Vorarlberg Wasser API",
+      "unknown": "Unexpected error occurred"
+    },
+    "abort": {
+      "already_configured": "Service is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Configure Vorarlberg Wasser",
+        "description": "Adjust the settings for the Vorarlberg Wasser integration."
+      }
+    }
+  }
+}
