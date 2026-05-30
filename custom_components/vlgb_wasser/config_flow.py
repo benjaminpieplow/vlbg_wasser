@@ -10,6 +10,7 @@ from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import config_validation as cv
 
 from .api import VlbgWasserAPI, VlbgWasserAPIError
 from .const import DOMAIN, RIVER_STATIONS
@@ -23,25 +24,26 @@ STATION_OPTIONS = {
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
-        vol.Required("station_id"): vol.In(STATION_OPTIONS),
+        vol.Required("station_ids"): cv.multi_select(STATION_OPTIONS),
     }
 )
 
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
     """Validate the user input allows us to connect."""
-    api = VlbgWasserAPI(hass)
-    station_id = data["station_id"]
+    station_ids = data.get("station_ids", [])
+    if not station_ids:
+        raise CannotConnect
 
+    api = VlbgWasserAPI(hass)
     try:
-        result = await api.get_measurement_data(station_id, "w")
+        result = await api.get_measurement_data(station_ids[0], "w")
         if not result:
             raise CannotConnect
     except VlbgWasserAPIError as err:
         raise CannotConnect from err
 
-    station_label = STATION_OPTIONS[station_id]
-    return {"title": f"Vorarlberg Wasser – {station_label}"}
+    return {"title": "Vorarlberg Wasser"}
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):

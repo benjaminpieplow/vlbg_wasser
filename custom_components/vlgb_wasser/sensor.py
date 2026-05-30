@@ -38,10 +38,18 @@ async def async_setup_entry(
         config_entry.entry_id
     ]
 
-    # For now, create a single sensor for the hardcoded station
-    # In future versions, this will be dynamic based on configuration
-    sensors = [VlbgWasserSensor(coordinator, "200014", "w")]
-    
+    station_map = {s["id"]: s for s in RIVER_STATIONS}
+    mtype_capabilities = {"w": "supports_depth", "q": "supports_flow", "wt": "supports_temperature"}
+
+    sensors = []
+    for station_id in config_entry.data.get("station_ids", []):
+        station = station_map.get(station_id)
+        if not station:
+            continue
+        for mtype, cap in mtype_capabilities.items():
+            if station[cap]:
+                sensors.append(VlbgWasserSensor(coordinator, station_id, mtype))
+
     async_add_entities(sensors)
 
 
@@ -78,23 +86,24 @@ class VlbgWasserSensor(CoordinatorEntity, SensorEntity):
         else:
             self._attr_name = f"Station {station_id} {measurement_type.upper()}"
 
+    def _measurement(self) -> dict:
+        """Return this sensor's slice of coordinator data."""
+        if not self.coordinator.data:
+            return {}
+        return self.coordinator.data.get(self._station_id, {}).get(self._measurement_type, {})
+
     @property
     def native_value(self) -> float | None:
         """Return the state of the sensor."""
-        if self.coordinator.data:
-            return self.coordinator.data.get("latest_value")
-        return None
+        return self._measurement().get("latest_value")
 
     @property
     def native_unit_of_measurement(self) -> str | None:
         """Return the unit of measurement."""
-        if self.coordinator.data:
-            unit = self.coordinator.data.get("unit", "")
-            # Map API units to Home Assistant units
-            if unit.lower() == "cm":
-                return UnitOfLength.CENTIMETERS
-            return unit
-        return None
+        unit = self._measurement().get("unit", "")
+        if unit.lower() == "cm":
+            return UnitOfLength.CENTIMETERS
+        return unit or None
 
     @property
     def device_class(self) -> SensorDeviceClass | None:
@@ -115,29 +124,28 @@ class VlbgWasserSensor(CoordinatorEntity, SensorEntity):
     @property
     def extra_state_attributes(self) -> dict[str, any]:
         """Return additional state attributes."""
-        attrs = {}
-        
-        if self.coordinator.data:
+        attrs = {"station_id": self._station_id, "measurement_type": self._measurement_type}
+        m = self._measurement()
+        if m:
             attrs.update({
-                "station_id": self._station_id,
-                "parameter": self.coordinator.data.get("parameter"),
-                "timezone": self.coordinator.data.get("timezone"),
-                "last_updated": self.coordinator.data.get("latest_time"),
-                "measurement_type": self._measurement_type,
+                "parameter": m.get("parameter"),
+                "timezone": m.get("timezone"),
+                "last_updated": m.get("latest_time"),
             })
-            
         if self._station_info:
             attrs.update({
                 "station_name": self._station_info["name"],
                 "river": self._station_info["river"],
             })
-            
         return attrs
 
     @property
     def available(self) -> bool:
         """Return if entity is available."""
-        return self.coordinator.last_update_success and self.coordinator.data is not None
+        return (
+            self.coordinator.last_update_success
+            and bool(self._measurement())
+        )
 
     @property
     def device_info(self):
