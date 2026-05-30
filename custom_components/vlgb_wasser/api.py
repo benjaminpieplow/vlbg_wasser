@@ -9,6 +9,7 @@ import async_timeout
 
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import API_BASE_URL, API_TIMEOUT
 
