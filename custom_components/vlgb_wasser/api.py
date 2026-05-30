@@ -30,7 +30,7 @@ class VlbgWasserAPI:
     def __init__(self, hass: HomeAssistant) -> None:
         """Initialize the API client."""
         self._hass = hass
-        self._session = hass.helpers.aiohttp_client.async_get_clientsession()
+        self._session = async_get_clientsession(hass)
 
     async def get_measurement_data(self, station_id: str, measurement_type: str) -> dict[str, Any]:
         """Get measurement data for a specific station and type."""
