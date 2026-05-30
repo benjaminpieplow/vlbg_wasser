@@ -26,6 +26,7 @@ SCAN_INTERVAL = timedelta(minutes=5)
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up VOWIS from a config entry."""
+    _LOGGER.debug("sensor.async_setup_entry called")
     hass.data.setdefault(DOMAIN, {})
     
     session = async_get_clientsession(hass)
