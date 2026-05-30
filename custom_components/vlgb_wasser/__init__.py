@@ -19,6 +19,7 @@ PLATFORMS: list[Platform] = [Platform.SENSOR]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up vlbg_wasser from a config entry."""
+    _LOGGER.debug("sensor.async_setup_entry called")
     hass.data.setdefault(DOMAIN, {})
     
     # Create API client
