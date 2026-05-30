@@ -12,30 +12,36 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 
 from .api import VlbgWasserAPI, VlbgWasserAPIError
-from .const import DOMAIN
+from .const import DOMAIN, RIVER_STATIONS
 
 _LOGGER = logging.getLogger(__name__)
 
-STEP_USER_DATA_SCHEMA = vol.Schema({})
+STATION_OPTIONS = {
+    s["id"]: f"{s['name']} ({s['river']})"
+    for s in RIVER_STATIONS
+}
+
+STEP_USER_DATA_SCHEMA = vol.Schema(
+    {
+        vol.Required("station_id"): vol.In(STATION_OPTIONS),
+    }
+)
 
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
-    """Validate the user input allows us to connect.
-    
-    Data has the keys from STEP_USER_DATA_SCHEMA with values provided by the user.
-    """
+    """Validate the user input allows us to connect."""
     api = VlbgWasserAPI(hass)
-    
+    station_id = data["station_id"]
+
     try:
-        # Test the API connection with the hardcoded values
-        result = await api.get_measurement_data("200014", "w")
+        result = await api.get_measurement_data(station_id, "w")
         if not result:
             raise CannotConnect
     except VlbgWasserAPIError as err:
         raise CannotConnect from err
-    
-    # Return info that you want to store in the config entry.
-    return {"title": "Vorarlberg Wasser"}
+
+    station_label = STATION_OPTIONS[station_id]
+    return {"title": f"Vorarlberg Wasser – {station_label}"}
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):

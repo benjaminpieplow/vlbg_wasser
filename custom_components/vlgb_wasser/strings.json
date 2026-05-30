@@ -4,7 +4,9 @@
       "user": {
         "title": "Set up Vorarlberg Wasser",
         "description": "This integration will connect to the Vorarlberg water monitoring system to retrieve water level, flow, and temperature data from river monitoring stations.",
-        "data": {}
+        "data": {
+          "station_id": "Monitoring station"
+        }
       }
     },
     "error": {
