@@ -35,10 +35,13 @@ class VlbgWasserAPI:
     async def probe_capabilities(self, station_id: str) -> dict[str, bool]:
         """Return which measurement types are supported by probing the API."""
         from .const import ALL_MEASUREMENT_TYPES
+        _LOGGER.info("Probing capabilities for station %s (types: %s)", station_id, ALL_MEASUREMENT_TYPES)
         results = await asyncio.gather(
             *[self.get_measurement_data(station_id, mtype) for mtype in ALL_MEASUREMENT_TYPES]
         )
-        return {mtype: bool(result) for mtype, result in zip(ALL_MEASUREMENT_TYPES, results)}
+        caps = {mtype: bool(result) for mtype, result in zip(ALL_MEASUREMENT_TYPES, results)}
+        _LOGGER.info("Station %s capabilities: %s", station_id, caps)
+        return caps
 
     async def get_measurement_data(self, station_id: str, measurement_type: str) -> dict[str, Any]:
         """Get measurement data for a specific station and type."""
@@ -56,7 +59,13 @@ class VlbgWasserAPI:
 
                     _LOGGER.debug("API response for station %s, type %s: %s", station_id, measurement_type, data)
 
-                    return self._process_data(data, station_id)
+                    result = self._process_data(data, station_id)
+                    if not result:
+                        _LOGGER.warning(
+                            "Station %s / %s: _process_data returned empty — raw response was: %s",
+                            station_id, measurement_type, data,
+                        )
+                    return result
                     
         except aiohttp.ClientError as error:
             _LOGGER.error("Connection error fetching data from %s: %s", url, error)
@@ -90,7 +99,10 @@ class VlbgWasserAPI:
             }
             
         except KeyError as error:
-            _LOGGER.error("Unexpected API response structure: %s", error)
+            _LOGGER.error(
+                "Unexpected API response structure (missing key %s) — full response: %s",
+                error, data,
+            )
             raise VlbgWasserAPIError(f"Unexpected API response structure: {error}") from error
 
 

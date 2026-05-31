@@ -42,11 +42,14 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
             *[api.probe_capabilities(sid) for sid in station_ids]
         )
     except VlbgWasserAPIError as err:
+        _LOGGER.error("API error while probing stations %s: %s", station_ids, err)
         raise CannotConnect from err
 
+    capabilities = dict(zip(station_ids, caps_list))
+    _LOGGER.info("Probed capabilities for all stations: %s", capabilities)
     return {
         "title": "Vorarlberg Wasser",
-        "capabilities": dict(zip(station_ids, caps_list)),
+        "capabilities": capabilities,
     }
 
 
