@@ -6,7 +6,6 @@ import logging
 from typing import Any
 
 import aiohttp
-import async_timeout
 
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
@@ -47,7 +46,7 @@ class VlbgWasserAPI:
         params = {"hzbnr": station_id}
         
         try:
-            async with async_timeout.timeout(API_TIMEOUT):
+            async with asyncio.timeout(API_TIMEOUT):
                 async with self._session.get(url, params=params) as response:
                     if response.status == 400:
                         _LOGGER.debug("Station %s does not support measurement type %s (400)", station_id, measurement_type)
@@ -105,7 +104,7 @@ class BodenseeAPI:
     async def get_data(self) -> dict[str, Any]:
         """Fetch and return the latest Bodensee measurements."""
         try:
-            async with async_timeout.timeout(API_TIMEOUT):
+            async with asyncio.timeout(API_TIMEOUT):
                 async with self._session.get(API_BODENSEE_URL) as response:
                     response.raise_for_status()
                     data = await response.json()
