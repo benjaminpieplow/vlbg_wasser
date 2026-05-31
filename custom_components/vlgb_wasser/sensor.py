@@ -22,8 +22,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from . import VlbgWasserDataUpdateCoordinator
-from .const import DOMAIN, RIVER_STATIONS, MEASUREMENT_TYPES
+from . import VlbgWasserDataUpdateCoordinator, BodenseeDataUpdateCoordinator
+from .const import DOMAIN, RIVER_STATIONS, MEASUREMENT_TYPES, BODENSEE_SENSORS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -34,9 +34,9 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the sensor platform."""
-    coordinator: VlbgWasserDataUpdateCoordinator = hass.data[DOMAIN][
-        config_entry.entry_id
-    ]
+    coordinators = hass.data[DOMAIN][config_entry.entry_id]
+    coordinator: VlbgWasserDataUpdateCoordinator = coordinators["river"]
+    bodensee_coordinator: BodenseeDataUpdateCoordinator = coordinators["bodensee"]
 
     station_map = {s["id"]: s for s in RIVER_STATIONS}
     mtype_capabilities = {"w": "supports_depth", "q": "supports_flow", "wt": "supports_temperature"}
@@ -49,6 +49,9 @@ async def async_setup_entry(
         for mtype, cap in mtype_capabilities.items():
             if station[cap]:
                 sensors.append(VlbgWasserSensor(coordinator, station_id, mtype))
+
+    for sensor_def in BODENSEE_SENSORS:
+        sensors.append(BodenseeSensor(bodensee_coordinator, sensor_def))
 
     async_add_entities(sensors)
 
@@ -159,3 +162,57 @@ class VlbgWasserSensor(CoordinatorEntity, SensorEntity):
                 "sw_version": "1.0.0",
             }
         return None
+
+
+class BodenseeSensor(CoordinatorEntity, SensorEntity):
+    """Representation of a Bodensee sensor."""
+
+    def __init__(
+        self,
+        coordinator: BodenseeDataUpdateCoordinator,
+        sensor_def: dict,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._key = sensor_def["key"]
+        self._unit = sensor_def["unit"]
+        self._device_class = sensor_def["device_class"]
+        self._attr_unique_id = f"{DOMAIN}_{self._key}"
+        self._attr_name = self._key.replace("_", " ").title()
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the state of the sensor."""
+        if not self.coordinator.data:
+            return None
+        return self.coordinator.data.get(self._key)
+
+    @property
+    def native_unit_of_measurement(self) -> str | None:
+        """Return the unit of measurement."""
+        return self._unit
+
+    @property
+    def device_class(self) -> SensorDeviceClass | None:
+        """Return the device class."""
+        return self._device_class
+
+    @property
+    def state_class(self) -> SensorStateClass | None:
+        """Return the state class."""
+        return SensorStateClass.MEASUREMENT
+
+    @property
+    def available(self) -> bool:
+        """Return if entity is available."""
+        return self.coordinator.last_update_success and self.coordinator.data is not None
+
+    @property
+    def device_info(self):
+        """Return device information."""
+        return {
+            "identifiers": {(DOMAIN, "bodensee")},
+            "name": "Bodensee Bregenz",
+            "manufacturer": "Wasserwirtschaft Vorarlberg",
+            "model": "Lake Monitoring Station",
+        }

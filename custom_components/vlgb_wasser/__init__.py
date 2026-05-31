@@ -11,7 +11,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import DOMAIN, DEFAULT_SCAN_INTERVAL, RIVER_STATIONS
-from .api import VlbgWasserAPI
+from .api import VlbgWasserAPI, BodenseeAPI
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,17 +23,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     _LOGGER.debug("sensor.async_setup_entry called")
     hass.data.setdefault(DOMAIN, {})
     
-    # Create API client
+    # Create API clients
     api = VlbgWasserAPI(hass)
-    
-    # Create coordinator
+    bodensee_api = BodenseeAPI(hass)
+
+    # Create coordinators
     station_ids = entry.data.get("station_ids", [])
     coordinator = VlbgWasserDataUpdateCoordinator(hass, api, station_ids)
-    
+    bodensee_coordinator = BodenseeDataUpdateCoordinator(hass, bodensee_api)
+
     # Fetch initial data so we have data when entities subscribe
     await coordinator.async_config_entry_first_refresh()
-    
-    hass.data[DOMAIN][entry.entry_id] = coordinator
+    await bodensee_coordinator.async_config_entry_first_refresh()
+
+    hass.data[DOMAIN][entry.entry_id] = {
+        "river": coordinator,
+        "bodensee": bodensee_coordinator,
+    }
     
     # Forward the setup to the sensor platform
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
@@ -56,6 +62,27 @@ _MTYPE_CAPABILITIES = {
 }
 
 _STATION_MAP = {s["id"]: s for s in RIVER_STATIONS}
+
+
+class BodenseeDataUpdateCoordinator(DataUpdateCoordinator):
+    """Class to manage fetching Bodensee data."""
+
+    def __init__(self, hass: HomeAssistant, api: BodenseeAPI) -> None:
+        """Initialize."""
+        self.api = api
+        super().__init__(
+            hass,
+            _LOGGER,
+            name=f"{DOMAIN}_bodensee",
+            update_interval=timedelta(seconds=DEFAULT_SCAN_INTERVAL),
+        )
+
+    async def _async_update_data(self):
+        """Fetch Bodensee measurements."""
+        try:
+            return await self.api.get_data()
+        except Exception as exc:
+            raise UpdateFailed() from exc
 
 
 class VlbgWasserDataUpdateCoordinator(DataUpdateCoordinator):

@@ -1,9 +1,12 @@
 """Constants for the vlgb_wasser integration."""
 
+from homeassistant.components.sensor import SensorDeviceClass
+
 DOMAIN = "vlbg_wasser"
 
 # API Configuration
 API_BASE_URL = "https://vowis.vorarlberg.at/api/"
+API_BODENSEE_URL = "https://vowis.vorarlberg.at/api/see"
 API_TIMEOUT = 30
 
 # River Stations Configuration
@@ -51,3 +54,18 @@ MEASUREMENT_TYPES = {
 
 # Default entity configuration
 DEFAULT_SCAN_INTERVAL = 300  # 5 minutes in seconds
+
+BODENSEE_SENSORS = [
+    {"key": "bodensee_pegelnullpunkt",  "path": ["pegelnullpunkt"],              "unit": "m",   "device_class": None},
+    {"key": "bodensee_luftfeuchte",     "path": ["luftfeuchte", "wert"],         "unit": "%",   "device_class": SensorDeviceClass.HUMIDITY},
+    {"key": "bodensee_lufttemp",        "path": ["lufttemperatur", "wert"],      "unit": "°C",  "device_class": SensorDeviceClass.TEMPERATURE},
+    {"key": "bodensee_wasserstand",     "path": ["wasserstand", "wert"],         "unit": "cm",  "device_class": SensorDeviceClass.DISTANCE},
+    {"key": "bodensee_wasser_temp",     "path": ["wTemperatur", "wert"],         "unit": "°C",  "device_class": SensorDeviceClass.TEMPERATURE},
+    {"key": "bodensee_wasser_temp_05",  "path": ["wtMilli05", "wert"],           "unit": "°C",  "device_class": SensorDeviceClass.TEMPERATURE},
+    {"key": "bodensee_wasser_temp_25",  "path": ["wtMilli25", "wert"],           "unit": "°C",  "device_class": SensorDeviceClass.TEMPERATURE},
+    {"key": "bodensee_wind_gesw",       "path": ["windgeschwindigkeit", "wert"], "unit": "m/s", "device_class": SensorDeviceClass.WIND_SPEED},
+    {"key": "bodensee_wind_richtung",   "path": ["windrichtung", "wert"],        "unit": "°",   "device_class": None},
+    {"key": "bodensee_wind_boe",        "path": ["windboe", "wert"],             "unit": "m/s", "device_class": SensorDeviceClass.WIND_SPEED},
+    {"key": "bodensee_stand_nied",      "path": ["nnw", "wert"],                 "unit": "cm",  "device_class": None},
+    {"key": "bodensee_stand_hoch",      "path": ["hhw", "wert"],                 "unit": "cm",  "device_class": None},
+]
