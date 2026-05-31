@@ -6,7 +6,8 @@ import logging
 import random
 from datetime import timedelta
 
-from homeassistant.components.repairs import IssueSeverity, async_create_issue, async_delete_issue
+from homeassistant.components.repairs import async_create_issue, async_delete_issue
+from homeassistant.components.repairs.models import IssueSeverity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, callback
