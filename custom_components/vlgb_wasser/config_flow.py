@@ -1,6 +1,7 @@
 """Config flow for vlbg_wasser integration."""
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Any
 
@@ -30,20 +31,23 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
-    """Validate the user input allows us to connect."""
+    """Validate the user input and probe station capabilities."""
     station_ids = data.get("station_ids", [])
     if not station_ids:
         raise CannotConnect
 
     api = VlbgWasserAPI(hass)
     try:
-        result = await api.get_measurement_data(station_ids[0], "w")
-        if not result:
-            raise CannotConnect
+        caps_list = await asyncio.gather(
+            *[api.probe_capabilities(sid) for sid in station_ids]
+        )
     except VlbgWasserAPIError as err:
         raise CannotConnect from err
 
-    return {"title": "Vorarlberg Wasser"}
+    return {
+        "title": "Vorarlberg Wasser",
+        "capabilities": dict(zip(station_ids, caps_list)),
+    }
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -65,7 +69,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
             else:
-                return self.async_create_entry(title=info["title"], data=user_input)
+                return self.async_create_entry(
+                    title=info["title"],
+                    data={
+                        "station_ids": user_input["station_ids"],
+                        "capabilities": info["capabilities"],
+                    },
+                )
 
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors

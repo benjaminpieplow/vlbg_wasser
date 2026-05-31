@@ -17,6 +17,12 @@
       "already_configured": "Service is already configured"
     }
   },
+  "issues": {
+    "capability_changed": {
+      "title": "Station capability changed: {station_name}",
+      "description": "**{station_name}**: {measurement_type} is **{change}**. Reload the integration to update the entity's enabled state."
+    }
+  },
   "options": {
     "step": {
       "init": {

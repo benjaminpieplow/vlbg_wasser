@@ -1,6 +1,7 @@
 """API client for vlbg_wasser integration."""
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Any
 
@@ -31,6 +32,14 @@ class VlbgWasserAPI:
         """Initialize the API client."""
         self._hass = hass
         self._session = async_get_clientsession(hass)
+
+    async def probe_capabilities(self, station_id: str) -> dict[str, bool]:
+        """Return which measurement types are supported by probing the API."""
+        from .const import ALL_MEASUREMENT_TYPES
+        results = await asyncio.gather(
+            *[self.get_measurement_data(station_id, mtype) for mtype in ALL_MEASUREMENT_TYPES]
+        )
+        return {mtype: bool(result) for mtype, result in zip(ALL_MEASUREMENT_TYPES, results)}
 
     async def get_measurement_data(self, station_id: str, measurement_type: str) -> dict[str, Any]:
         """Get measurement data for a specific station and type."""

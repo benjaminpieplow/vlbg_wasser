@@ -9,7 +9,6 @@ Wir weisen ausdrücklich darauf hin, dass wir hinsichtlich Verfügbarkeit, Perfo
 from __future__ import annotations
 
 import logging
-from datetime import datetime
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -23,7 +22,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import VlbgWasserDataUpdateCoordinator, BodenseeDataUpdateCoordinator
-from .const import DOMAIN, RIVER_STATIONS, MEASUREMENT_TYPES, BODENSEE_SENSORS
+from .const import DOMAIN, RIVER_STATIONS, MEASUREMENT_TYPES, ALL_MEASUREMENT_TYPES, BODENSEE_SENSORS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,22 +37,22 @@ async def async_setup_entry(
     coordinator: VlbgWasserDataUpdateCoordinator = coordinators["river"]
     bodensee_coordinator: BodenseeDataUpdateCoordinator = coordinators["bodensee"]
 
-    station_map = {s["id"]: s for s in RIVER_STATIONS}
-    mtype_capabilities = {"w": "supports_depth", "q": "supports_flow", "wt": "supports_temperature"}
+    capabilities = config_entry.data.get("capabilities", {})
 
     sensors = []
     for station_id in config_entry.data.get("station_ids", []):
-        station = station_map.get(station_id)
-        if not station:
-            continue
-        for mtype, cap in mtype_capabilities.items():
-            if station[cap]:
-                sensors.append(VlbgWasserSensor(coordinator, station_id, mtype))
+        station_caps = capabilities.get(station_id, {})
+        for mtype in ALL_MEASUREMENT_TYPES:
+            enabled = station_caps.get(mtype, True)
+            sensors.append(VlbgWasserSensor(coordinator, station_id, mtype, enabled))
 
     for sensor_def in BODENSEE_SENSORS:
         sensors.append(BodenseeSensor(bodensee_coordinator, sensor_def))
 
     async_add_entities(sensors)
+
+
+_STATION_MAP = {s["id"]: s for s in RIVER_STATIONS}
 
 
 class VlbgWasserSensor(CoordinatorEntity, SensorEntity):
@@ -64,30 +63,29 @@ class VlbgWasserSensor(CoordinatorEntity, SensorEntity):
         coordinator: VlbgWasserDataUpdateCoordinator,
         station_id: str,
         measurement_type: str,
+        enabled_default: bool = True,
     ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._station_id = station_id
         self._measurement_type = measurement_type
-        
-        # Find station info from constants
-        station_info = None
-        for station in RIVER_STATIONS:
-            if station["id"] == station_id:
-                station_info = station
-                break
-        
-        self._station_info = station_info
+        self._enabled_default = enabled_default
+
+        self._station_info = _STATION_MAP.get(station_id)
         self._attr_unique_id = f"{DOMAIN}_{station_id}_{measurement_type}"
-        
-        # Set sensor name
-        if station_info:
-            station_name = station_info["name"]
-            river_name = station_info["river"]
+
+        if self._station_info:
+            station_name = self._station_info["name"]
+            river_name = self._station_info["river"]
             measurement_name = MEASUREMENT_TYPES.get(measurement_type, measurement_type)
             self._attr_name = f"{river_name} {station_name} {measurement_name.title()}"
         else:
             self._attr_name = f"Station {station_id} {measurement_type.upper()}"
+
+    @property
+    def entity_registry_enabled_default(self) -> bool:
+        """Return whether the entity should be enabled when first added."""
+        return self._enabled_default
 
     def _measurement(self) -> dict:
         """Return this sensor's slice of coordinator data."""
@@ -111,12 +109,10 @@ class VlbgWasserSensor(CoordinatorEntity, SensorEntity):
     @property
     def device_class(self) -> SensorDeviceClass | None:
         """Return the device class."""
-        if self._measurement_type == "w":  # Water depth
+        if self._measurement_type == "w":
             return SensorDeviceClass.DISTANCE
-        elif self._measurement_type == "wt":  # Water temperature
+        if self._measurement_type == "wt":
             return SensorDeviceClass.TEMPERATURE
-        elif self._measurement_type == "q":  # Water flow
-            return None  # No specific device class for flow rate
         return None
 
     @property
