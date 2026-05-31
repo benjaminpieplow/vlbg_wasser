@@ -44,11 +44,16 @@ async def async_setup_entry(
         station_caps = capabilities.get(station_id, {})
         for mtype in ALL_MEASUREMENT_TYPES:
             enabled = station_caps.get(mtype, True)
+            _LOGGER.info(
+                "Creating sensor: station=%s mtype=%s enabled_default=%s (caps for station: %s)",
+                station_id, mtype, enabled, station_caps,
+            )
             sensors.append(VlbgWasserSensor(coordinator, station_id, mtype, enabled))
 
     for sensor_def in BODENSEE_SENSORS:
         sensors.append(BodenseeSensor(bodensee_coordinator, sensor_def))
 
+    _LOGGER.info("Calling async_add_entities with %d sensors", len(sensors))
     async_add_entities(sensors)
 
 
