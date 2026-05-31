@@ -179,6 +179,8 @@ class BodenseeSensor(CoordinatorEntity, SensorEntity):
         self._device_class = sensor_def["device_class"]
         self._attr_unique_id = f"{DOMAIN}_{self._key}"
         self._attr_name = self._key.replace("_", " ").title()
+        if sensor_def.get("icon"):
+            self._attr_icon = sensor_def["icon"]
 
     @property
     def native_value(self) -> float | None:
