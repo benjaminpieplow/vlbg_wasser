@@ -56,15 +56,15 @@ MEASUREMENT_TYPES = {
 DEFAULT_SCAN_INTERVAL = 300  # 5 minutes in seconds
 
 BODENSEE_SENSORS = [
-    {"key": "bodensee_pegelnullpunkt",  "path": ["pegelnullpunkt"],              "unit": "m",   "device_class": None,                          "icon": "mdi:wave-arrow-down"},
-    {"key": "bodensee_luftfeuchte",     "path": ["luftfeuchte", "wert"],         "unit": "%",   "device_class": SensorDeviceClass.HUMIDITY,     "icon": "mdi:water-percent"},
-    {"key": "bodensee_lufttemp",        "path": ["lufttemperatur", "wert"],      "unit": "°C",  "device_class": SensorDeviceClass.TEMPERATURE,  "icon": "mdi:thermometer"},
-    {"key": "bodensee_wasserstand",     "path": ["wasserstand", "wert"],         "unit": "cm",  "device_class": SensorDeviceClass.DISTANCE,     "icon": "mdi:wave"},
-     {"key": "bodensee_wasser_temp_05",  "path": ["wtMilli05", "wert"],           "unit": "°C",  "device_class": SensorDeviceClass.TEMPERATURE,  "icon": "mdi:thermometer-chevron-down"},
-    {"key": "bodensee_wasser_temp_25",  "path": ["wtMilli25", "wert"],           "unit": "°C",  "device_class": SensorDeviceClass.TEMPERATURE,  "icon": "mdi:thermometer-chevron-down"},
-    {"key": "bodensee_wind_gesw",       "path": ["windgeschwindigkeit", "wert"], "unit": "m/s", "device_class": SensorDeviceClass.WIND_SPEED,   "icon": "mdi:weather-windy"},
-    {"key": "bodensee_wind_richtung",   "path": ["windrichtung", "wert"],        "unit": "°",   "device_class": None,                          "icon": "mdi:compass"},
-    {"key": "bodensee_wind_boe",        "path": ["windboe", "wert"],             "unit": "m/s", "device_class": SensorDeviceClass.WIND_SPEED,   "icon": "mdi:tailwind"},
-    {"key": "bodensee_stand_nied",      "path": ["nnw", "wert"],                 "unit": "cm",  "device_class": None,                          "icon": "mdi:wave-arrow-down"},
-    {"key": "bodensee_stand_hoch",      "path": ["hhw", "wert"],                 "unit": "cm",  "device_class": None,                          "icon": "mdi:wave-arrow-up"},
+    {"key": "bodensee_pegelnullpunkt",  "path": ["pegelnullpunkt"],              "unit": "m",   "device_class": None,                             "icon": "mdi:wave-arrow-down"},
+    {"key": "bodensee_luftfeuchte",     "path": ["luftfeuchte", "wert"],         "unit": "%",   "device_class": SensorDeviceClass.HUMIDITY,       "icon": "mdi:water-percent"},
+    {"key": "bodensee_lufttemp",        "path": ["lufttemperatur", "wert"],      "unit": "°C",  "device_class": SensorDeviceClass.TEMPERATURE,    "icon": "mdi:thermometer"},
+    {"key": "bodensee_wasserstand",     "path": ["wasserstand", "wert"],         "unit": "cm",  "device_class": SensorDeviceClass.DISTANCE,       "icon": "mdi:wave"},
+    {"key": "bodensee_wasser_temp_05",  "path": ["wtMilli05", "wert"],           "unit": "°C",  "device_class": SensorDeviceClass.TEMPERATURE,    "icon": "mdi:thermometer-chevron-down"},
+    {"key": "bodensee_wasser_temp_25",  "path": ["wtMilli25", "wert"],           "unit": "°C",  "device_class": SensorDeviceClass.TEMPERATURE,    "icon": "mdi:thermometer-chevron-down"},
+    {"key": "bodensee_wind_gesw",       "path": ["windgeschwindigkeit", "wert"], "unit": "m/s", "device_class": SensorDeviceClass.WIND_SPEED,     "icon": "mdi:weather-windy"},
+    {"key": "bodensee_wind_richtung",   "path": ["windrichtung", "wert"],        "unit": "°",   "device_class": SensorDeviceClass.WIND_DIRECTION, "icon": "mdi:compass"},
+    {"key": "bodensee_wind_boe",        "path": ["windboe", "wert"],             "unit": "m/s", "device_class": SensorDeviceClass.WIND_SPEED,     "icon": "mdi:tailwind"},
+    {"key": "bodensee_stand_nied",      "path": ["nnw", "wert"],                 "unit": "cm",  "device_class": SensorDeviceClass.DISTANCE,       "icon": "mdi:wave-arrow-down"},
+    {"key": "bodensee_stand_hoch",      "path": ["hhw", "wert"],                 "unit": "cm",  "device_class": SensorDeviceClass.DISTANCE,       "icon": "mdi:wave-arrow-up"},
 ]
