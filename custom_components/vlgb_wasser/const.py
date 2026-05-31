@@ -56,7 +56,7 @@ MEASUREMENT_TYPES = {
 DEFAULT_SCAN_INTERVAL = 300  # 5 minutes in seconds
 
 BODENSEE_SENSORS = [
-    {"key": "bodensee_pegelnullpunkt",  "path": ["pegelnullpunkt"],              "unit": "m",   "device_class": None,                             "icon": "mdi:wave-arrow-down"},
+    {"key": "bodensee_pegelnullpunkt",  "path": ["pegelnullpunkt"],              "unit": "m",   "device_class": None,                             "icon": "mdi:altimieter"},
     {"key": "bodensee_luftfeuchte",     "path": ["luftfeuchte", "wert"],         "unit": "%",   "device_class": SensorDeviceClass.HUMIDITY,       "icon": "mdi:water-percent"},
     {"key": "bodensee_lufttemp",        "path": ["lufttemperatur", "wert"],      "unit": "°C",  "device_class": SensorDeviceClass.TEMPERATURE,    "icon": "mdi:thermometer"},
     {"key": "bodensee_wasserstand",     "path": ["wasserstand", "wert"],         "unit": "cm",  "device_class": SensorDeviceClass.DISTANCE,       "icon": "mdi:wave"},

@@ -1,10 +1,10 @@
 # vlbg_wasser
 Unofficial/Inoffizielle VOWIS Add-On. I apologize for the English - I want to get this done and my German is _slow_. I will translate it at some point (or you can help 😘)
 
-This project started with the question "where can I go swimming" and me being too lazy to open the [Water Map](https://vowis.vorarlberg.at/stationswrapper/abfluss) on my phone to check which river had a good balance of distance vs being too cold. I hope to eventually expand to groundwater (for example, to control sprinklers or [pool filling](https://vorarlberg.orf.at/stories/3303202/) based on supply) but that's a #TODO.
+This project started with the question "where can I go swimming" and me being too lazy to open the [Water Map](https://vowis.vorarlberg.at/stationswrapper/abfluss) on my phone to check which river had a good balance of distance vs being too cold. I hope to eventually expand to groundwater (for example, to control sprinklers or [pool filling](https://vorarlberg.orf.at/stories/3303202/) based on supply) but that's a #TODO. Poking around on the website I found a lot of calls made to an "api" endpoint, and what-do-you-know, this is one of the cleanest data sources I have found. I also want to thank the Amt der Vorarlberger Landesregierung for their support, they were extremely helpful with a few edge cases.
 
-
-
+## Home Assistant Structure
+The integration will allow you to create a "Hub" in Home Assistant (Integrations -> Add Integration). This hub will automatically provision Bodensee measurements. During setup, you have the option to select which stations to add.
 
 # Disclaimer and Gotcha's
 Quellennachweis „Amt der Vorarlberger Landesregierung, Abt. VIId – Wasserwirtschaft“
@@ -21,3 +21,4 @@ As the warning above states, this is raw data. While the data from the API inclu
 ![timeline shift](/doc/img/timeframe.drawio.svg "Time is a magical thing")
 
 All that to say - please do not use this data for reference/as reasearch! If you need the bulk data, check the website, they have a lot of cool tools (or contact them).
+
