@@ -40,11 +40,14 @@ class VlbgWasserAPI:
         try:
             async with async_timeout.timeout(API_TIMEOUT):
                 async with self._session.get(url, params=params) as response:
+                    if response.status == 400:
+                        _LOGGER.debug("Station %s does not support measurement type %s (400)", station_id, measurement_type)
+                        return {}
                     response.raise_for_status()
                     data = await response.json()
-                    
+
                     _LOGGER.debug("API response for station %s, type %s: %s", station_id, measurement_type, data)
-                    
+
                     return self._process_data(data, station_id)
                     
         except aiohttp.ClientError as error:
